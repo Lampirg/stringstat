@@ -1,60 +1,54 @@
 package dev.lampirg;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
 
 public class StringHandler {
 
+    private StringHandler() {
+        throw new IllegalStateException("Utility class");
+    }
+
 
     @SneakyThrows
-    public static List<Group> getStat(Stream<String> lines) {
-        Set<List<IdentityKey>> strings = lines
+    public static List<Group> getStat(Supplier<Stream<String>> lines) {
+        AtomicInteger integer = new AtomicInteger(0);
+        Set<Line> strings = lines.get()
                 .distinct()
                 .map(s -> s.split(";"))
                 .filter(StringHandler::isValid)
                 .map(StringHandler::toKeys)
+                .map(Line::line)
+                .map(line -> {
+                    line.setOriginalIndex(integer.getAndIncrement());
+                    return line;
+                })
                 .collect(toCollection(HashSet::new));
-
-        Map<IdentityKey, StringsAndKeys> keysMap = new HashMap<>();
-        for (List<IdentityKey> string : strings) {
-            StringsAndKeys all = new StringsAndKeys(new LinkedStrings(string));
-            for (IdentityKey key : string) {
-                if (keysMap.containsKey(key)) {
-                    all.add(keysMap.get(key));
-                }
-            }
-            for (IdentityKey key : all.keys) {
-                keysMap.putIfAbsent(key, all);
-            }
-        }
-        Set<Group> groups = new HashSet<>();
-        for (StringsAndKeys stringsAndKeys : keysMap.values()) {
-            groups.add(Group.from(stringify(stringsAndKeys.linkedStrings)));
-        }
-        return new ArrayList<>(groups);
-    }
-
-    private static void fillGroup(Map<IdentityKey, Set<LinkedStrings>> keysMap, Set<LinkedStrings> linkedStrings, Set<LinkedStrings> group) {
-        for (LinkedStrings ls : linkedStrings) {
-            group.add(ls);
-            for (IdentityKey key : ls.string) {
-                if (key.isEmpty() || keysMap.get(key) == linkedStrings) {
+        Set<Group> groups = strings.stream().map(Line::group).collect(toCollection(HashSet::new));
+        for (int i = 0; i < Collections.max(strings, Comparator.comparingInt(Line::size)).size(); i++) {
+            Map<IdentityKey, Group> keys = new HashMap<>();
+            for (Line line : strings) { // for group : groups
+                if (i >= line.size()) {
                     continue;
                 }
-                Set<LinkedStrings> toAdd = new HashSet<>(keysMap.get(key));
-                keysMap.get(key).clear();
-                fillGroup(keysMap, toAdd, group);
+                IdentityKey key = line.getKeys().get(i);
+                if (keys.containsKey(key)) {
+                    if (keys.get(key).equals(line.group())) {
+                        continue;
+                    }
+                    groups.remove(line.group());
+                    keys.get(key).addGroup(line.group());
+                }
+                keys.putIfAbsent(key, line.group());
             }
         }
+        return new ArrayList<>(groups);
     }
 
     private static boolean isValid(String[] arr) {
@@ -79,62 +73,5 @@ public class StringHandler {
             ));
         }
         return keys;
-    }
-
-    private static Collection<String> stringify(Collection<LinkedStrings> values) {
-        return values.stream().map(LinkedStrings::toString).collect(toSet());
-    }
-
-    static class StringsAndKeys {
-
-        Collection<LinkedStrings> linkedStrings = new HashSet<>();
-        Collection<IdentityKey> keys = new HashSet<>();
-        LinkedList<StringsAndKeys> others = new LinkedList<>();
-
-        public StringsAndKeys(LinkedStrings linkedString) {
-            linkedStrings.add(linkedString);
-            keys.addAll(linkedString.string);
-        }
-
-        public void add(StringsAndKeys stringsAndKeys) {
-            linkedStrings.addAll(stringsAndKeys.linkedStrings);
-            keys.addAll(stringsAndKeys.keys);
-        }
-    }
-
-    static class LinkedStrings {
-
-        @AllArgsConstructor
-        @EqualsAndHashCode
-        static class Root {
-            Collection<LinkedStrings> values;
-        }
-
-        final List<IdentityKey> string;
-        Collection<LinkedStrings> values;
-
-        public LinkedStrings(List<IdentityKey> string) {
-            this.string = string;
-            values = new HashSet<>();
-            values.add(this);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            LinkedStrings that = (LinkedStrings) o;
-            return string.equals(that.string);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(string);
-        }
-
-        @Override
-        public String toString() {
-            return string.stream().map(IdentityKey::toString).collect(joining(";"));
-        }
     }
 }
