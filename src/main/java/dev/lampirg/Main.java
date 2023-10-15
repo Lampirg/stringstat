@@ -3,21 +3,22 @@ package dev.lampirg;
 import dev.lampirg.logic.StringHandler;
 import dev.lampirg.logic.entities.Group;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 
-@Slf4j
 public class Main {
 
     private Main() {}
 
     @SneakyThrows
     public static void main(String[] args) {
-        try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/lng.txt"));
+        InputStreamReader in = new InputStreamReader((Main.class.getResource("/lng.txt").openStream()));
+        try (BufferedReader br = new BufferedReader(in);
              PrintWriter out = new PrintWriter("src/main/resources/" + args[0])) {
             List<Group> groups = StringHandler.getStat(br::lines);
             int count = 0;
@@ -28,7 +29,7 @@ public class Main {
                     count++;
                 }
             }
-            log.info(String.valueOf(count));
+            System.out.println(count);
         }
     }
 }
