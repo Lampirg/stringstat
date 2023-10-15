@@ -1,34 +1,51 @@
 package dev.lampirg;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 public class Group {
-    private Collection<String> strings;
+    private Collection<Line> lines;
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private GroupPointer pointerToThisGroup;
 
-    private Group(Collection<String> strings) {
-        this.strings = strings;
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Set<IdentityKey> keys;
+
+    private Group(Collection<Line> lines) {
+        this.lines = lines;
+        keys = lines.stream().flatMap(line -> line.getKeys().stream()).collect(Collectors.toSet());
+        pointerToThisGroup = GroupPointer.fromGroup(this);
     }
 
     public static Group getInstance() {
         return new Group(new HashSet<>());
     }
 
-    public static Group fromSingleValue(String string) {
-        Collection<String> single = new HashSet<>();
-        single.add(string);
+    public static Group fromSingleValue(Line line) {
+        Collection<Line> single = new HashSet<>();
+        single.add(line);
         return new Group(single);
     }
 
-    public static Group from(Collection<String> strings) {
-        return new Group(new HashSet<>(strings));
+    public static Group from(Collection<Line> lines) {
+        return new Group(new HashSet<>(lines));
     }
 
-
-    public boolean containsAny(Collection<String> collection) {
-        return collection.stream().anyMatch(s -> strings.contains(s));
+    public boolean containsKey(IdentityKey key) {
+        return keys.contains(key);
     }
 
+    public void addGroup(Group group) {
+        group.pointerToThisGroup.setPointer(this);
+        lines.addAll(group.getLines());
+        keys.addAll(group.getKeys());
+    }
 }
