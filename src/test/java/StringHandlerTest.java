@@ -1,14 +1,13 @@
-import dev.lampirg.Group;
-import dev.lampirg.IdentityKey;
-import dev.lampirg.Line;
-import dev.lampirg.StringHandler;
+import dev.lampirg.logic.StringHandler;
+import dev.lampirg.logic.entities.Group;
+import dev.lampirg.logic.entities.line.Line;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.stream.Stream;
 
-import static dev.lampirg.IdentityKey.*;
+import static dev.lampirg.logic.entities.line.Column.empty;
+import static dev.lampirg.logic.entities.line.Column.of;
 
 class StringHandlerTest {
     @Test

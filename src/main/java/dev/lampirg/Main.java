@@ -1,21 +1,25 @@
 package dev.lampirg;
 
+import dev.lampirg.logic.StringHandler;
+import dev.lampirg.logic.entities.Group;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 public class Main {
+
+    private Main() {}
 
     @SneakyThrows
     public static void main(String[] args) {
-        try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/lng.csv"));
-             PrintWriter out = new PrintWriter("src/main/resources/output.txt")) {
+        try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/lng.txt"));
+             PrintWriter out = new PrintWriter("src/main/resources/" + args[0])) {
             List<Group> groups = StringHandler.getStat(br::lines);
-            groups.sort(Comparator.comparingInt((Group group) -> group.getLines().size()).reversed());
             int count = 0;
             for (int i = 0; i < groups.size(); i++) {
                 out.println("Группа " + (i + 1));
@@ -24,7 +28,7 @@ public class Main {
                     count++;
                 }
             }
-            System.out.println(count);
+            log.info(String.valueOf(count));
         }
     }
 }
