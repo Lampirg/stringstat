@@ -57,10 +57,56 @@ class StringHandlerTest {
         Assertions.assertThat(actual).hasSameElementsAs(expected);
     }
 
-    private static Line lineFromStrings(long... longs) {
+    @Test
+    void givenTwoLinesWithEmptyColumn() {
+        List<String> input = List.of(
+                "\"\";\"79292555495\"",
+                "\"\";\"79815345729\""
+        );
+        List<Group> expected = List.of(
+                Group.fromSingleValue(lineFromStrings(-1, 79292555495L)),
+                Group.fromSingleValue(lineFromStrings(-1, 79815345729L))
+        );
+        List<Group> actual = StringHandler.getStat(input::stream);
+        Assertions.assertThat(actual).hasSameElementsAs(expected);
+    }
+
+    @Test
+    void givenNoQuotes() {
+        List<String> input = List.of(
+                ";;",
+                "\"\";\"79815345729\""
+        );
+        List<Group> expected = List.of(
+                Group.fromSingleValue(lineFromStrings(-1, -1, -1)),
+                Group.fromSingleValue(lineFromStrings(-1, 79815345729L))
+        );
+        List<Group> actual = StringHandler.getStat(input::stream);
+        Assertions.assertThat(actual).hasSameElementsAs(expected);
+    }
+
+    @Test
+    void givenDoubles() {
+        List<String> input = List.of(
+                ";\"79815345729.5\";\"115.5\"",
+                "\"\";\"79815345729.5\"",
+                "\"\";\"79815345729.4\""
+        );
+        List<Group> expected = List.of(
+                Group.from(List.of(
+                        lineFromStrings(-1, 79815345729.5, 115.5),
+                        lineFromStrings(-1, 79815345729.5)
+                )),
+                Group.fromSingleValue(lineFromStrings(-1, 79815345729.4))
+        );
+        List<Group> actual = StringHandler.getStat(input::stream);
+        Assertions.assertThat(actual).hasSameElementsAs(expected);
+    }
+
+    private static Line lineFromStrings(double... doubles) {
         List<Column> columns = new ArrayList<>();
-        for (int i = 0; i < longs.length; i++) {
-            columns.add(of(longs[i], i));
+        for (int i = 0; i < doubles.length; i++) {
+            columns.add(of(doubles[i], i));
         }
         return Line.line(columns);
     }

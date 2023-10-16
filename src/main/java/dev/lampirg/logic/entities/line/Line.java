@@ -26,11 +26,11 @@ public class Line {
     }
 
     public Line getLeader() {
-        if (leader.getPointedLine() == null) {
+        if (leader.getPointedLine() == null || leader.getPointedLine() == this) {
             return this;
         }
         Line line = leader.getPointedLine();
-        while (line.leader.getPointedLine() != null) {
+        while (line.leader.getPointedLine() != null && line.leader.getPointedLine() != line) {
             line = line.leader.getPointedLine();
         }
         leader.setPointedLine(line);
@@ -38,7 +38,7 @@ public class Line {
     }
 
     public void setLeader(Line line) {
-        if (leader.getPointedLine() != null) {
+        if (leader.getPointedLine() != null && leader.getPointedLine() != line) {
             leader.getPointedLine().setLeader(line);
         }
         leader.setPointedLine(line);
