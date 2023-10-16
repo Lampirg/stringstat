@@ -14,34 +14,34 @@ public class Line {
     private final List<Column> columns;
 
     @EqualsAndHashCode.Exclude
-    private Pointer pointer;
+    private Pointer leader;
 
     private Line(List<Column> columns) {
         this.columns = List.copyOf(columns);
-        pointer = Pointer.empty();
+        leader = Pointer.empty();
     }
 
     public static Line line(List<Column> keys) {
         return new Line(keys);
     }
 
-    public Line getGroup() {
-        if (pointer.getPointedLine() == null) {
+    public Line getLeader() {
+        if (leader.getPointedLine() == null) {
             return this;
         }
-        Line line = pointer.getPointedLine();
-        while (line.pointer.getPointedLine() != null) {
-            line = line.pointer.getPointedLine();
+        Line line = leader.getPointedLine();
+        while (line.leader.getPointedLine() != null) {
+            line = line.leader.getPointedLine();
         }
-        pointer.setPointedLine(line);
+        leader.setPointedLine(line);
         return line;
     }
 
-    public void setGroup(Line line) {
-        if (pointer.getPointedLine() != null) {
-            pointer.getPointedLine().setGroup(line);
+    public void setLeader(Line line) {
+        if (leader.getPointedLine() != null) {
+            leader.getPointedLine().setLeader(line);
         }
-        pointer.setPointedLine(line);
+        leader.setPointedLine(line);
     }
 
     public int size() {

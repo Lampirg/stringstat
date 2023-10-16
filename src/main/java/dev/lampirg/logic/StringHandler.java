@@ -24,8 +24,8 @@ public class StringHandler {
         Map<Line, Group> groupByLineLeader = createGroupsFromLeaders(keys);
         Set<Group> groupsFromEmpty = new HashSet<>();
         strings.forEach(line -> {
-            if (groupByLineLeader.containsKey(line.getGroup())) {
-                groupByLineLeader.get(line.getGroup()).add(line);
+            if (groupByLineLeader.containsKey(line.getLeader())) {
+                groupByLineLeader.get(line.getLeader()).add(line);
             } else {
                 groupsFromEmpty.add(Group.fromSingleValue(line));
             }
@@ -48,7 +48,7 @@ public class StringHandler {
                 continue;
             }
             if (keys.containsKey(key)) {
-                line.setGroup(keys.get(key).getGroup());
+                line.setLeader(keys.get(key).getLeader());
             } else {
                 keys.put(key, line);
             }
@@ -57,7 +57,7 @@ public class StringHandler {
 
     private static Map<Line, Group> createGroupsFromLeaders(Map<Column, Line> keys) {
         return keys.values().stream()
-                .filter(line -> line.getGroup() == line)
+                .filter(line -> line.getLeader() == line)
                 .distinct()
                 .collect(toMap(
                         line -> line,
