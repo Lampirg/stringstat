@@ -5,11 +5,12 @@ import dev.lampirg.logic.entities.Group;
 import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 
 public class Main {
 
@@ -17,9 +18,10 @@ public class Main {
 
     @SneakyThrows
     public static void main(String[] args) {
+        Files.createDirectories(Path.of("src/main/resources"));
         InputStreamReader in = new InputStreamReader((Main.class.getResource("/lng.txt").openStream()));
         try (BufferedReader br = new BufferedReader(in);
-             PrintWriter out = new PrintWriter("src/main/resources/" + args[0])) {
+             PrintWriter out = new PrintWriter("src/main/resources/" + args[0], StandardCharsets.UTF_8)) {
             List<Group> groups = StringHandler.getStat(br::lines);
             int count = 0;
             for (int i = 0; i < groups.size(); i++) {
