@@ -20,7 +20,7 @@ public class LinesExtractor {
     static Set<Line> extractLines(Supplier<Stream<String>> lines) {
         return lines.get()
                 .distinct()
-                .map(s -> s.split(";"))
+                .map(s -> s.split(";", -1))
                 .filter(LinesExtractor::isValid)
                 .map(LinesExtractor::toKeys)
                 .map(Line::line)
@@ -29,7 +29,7 @@ public class LinesExtractor {
 
     private static boolean isValid(String[] arr) {
         for (String s : arr) {
-            if (s.substring(1, s.length() - 1).contains("\"")) {
+            if (!s.isEmpty() && s.substring(1, s.length() - 1).contains("\"")) {
                 return false;
             }
         }
@@ -39,7 +39,7 @@ public class LinesExtractor {
     private static List<Column> toKeys(String[] arr) {
         List<Column> keys = new ArrayList<>(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            if (arr[i].equals("\"\"")) {
+            if (arr[i].equals("\"\"") || arr[i].isEmpty()) {
                 keys.add(Column.empty(i));
                 continue;
             }
