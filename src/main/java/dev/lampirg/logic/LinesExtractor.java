@@ -6,6 +6,7 @@ import dev.lampirg.logic.entities.line.Line;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -16,7 +17,7 @@ public class LinesExtractor {
     private LinesExtractor() {
     }
 
-    static HashSet<Line> extractLines(Supplier<Stream<String>> lines) {
+    static Set<Line> extractLines(Supplier<Stream<String>> lines) {
         return lines.get()
                 .distinct()
                 .map(s -> s.split(";"))
@@ -43,7 +44,7 @@ public class LinesExtractor {
                 continue;
             }
             keys.add(Column.of(
-                    Long.parseLong(arr[i].substring(1, arr[i].length() - 1)),
+                    Double.parseDouble(arr[i].substring(1, arr[i].length() - 1)),
                     i
             ));
         }
